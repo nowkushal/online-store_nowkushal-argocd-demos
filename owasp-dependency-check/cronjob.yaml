@@ -19,12 +19,16 @@ spec:
             args:
               - "--project"
               - "devsecops-scan"
+              - "--scan"
+              - "/scan"
               - "--out"
               - "/reports"
               - "--nvdApiKey"
               - ""
               - "--data"
               - "/usr/share/dependency-check/data"
+              - "--format"
+              - "ALL"
             resources:
               requests:
                 memory: "1Gi"
@@ -35,11 +39,15 @@ spec:
             volumeMounts:
             - name: owasp-data
               mountPath: /usr/share/dependency-check/data
+            - name: scan-data
+              mountPath: /scan
             - name: reports
               mountPath: /reports
           volumes:
           - name: owasp-data
             persistentVolumeClaim:
               claimName: owasp-data-pvc
+          - name: scan-data
+            emptyDir: {}
           - name: reports
             emptyDir: {}
