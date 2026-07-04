@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: owasp-dependency-check
+  namespace: security-tools
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: dependency-check
+            image: owasp/dependency-check:latest
+            args:
+              - "--project"
+              - "devsecops-scan"
+              - "--out"
+              - "/reports"
+              - "--nvdApiKey"
+              - ""
+              - "--data"
+              - "/usr/share/dependency-check/data"
+            resources:
+              requests:
+                memory: "1Gi"
+                cpu: "500m"
+              limits:
+                memory: "2Gi"
+                cpu: "1000m"
+            volumeMounts:
+            - name: owasp-data
+              mountPath: /usr/share/dependency-check/data
+            - name: reports
+              mountPath: /reports
+          volumes:
+          - name: owasp-data
+            persistentVolumeClaim:
+              claimName: owasp-data-pvc
+          - name: reports
+            emptyDir: {}
